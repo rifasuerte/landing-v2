@@ -538,6 +538,7 @@ export default function RaffleDetailPage() {
               setUserId(userDataResponse.id);
 
               // 2. Crear payment con el userId
+              const paymentMethodString = `${selectedPaymentMethod.method} (${selectedPaymentMethod.id})`;
               const paymentResponse = await fetch(`${API_URL}/payment`, {
                 method: 'POST',
                 headers: {
@@ -545,7 +546,7 @@ export default function RaffleDetailPage() {
                 },
                 body: JSON.stringify({
                   voucher: base64,
-                  method: selectedPaymentMethod.method,
+                  method: paymentMethodString,
                   raffle: raffle.id,
                   user: userDataResponse.id,
                 }),
