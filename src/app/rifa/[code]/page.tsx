@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import LoadingScreen from '@/components/LoadingScreen';
 import ImageWithGoogleDrive from '@/components/ImageWithGoogleDrive';
@@ -121,6 +121,34 @@ export default function RaffleDetailPage() {
     }
   };
 
+  // Función para actualizar los datos de la rifa sin mostrar loading
+  const refreshRaffleData = useCallback(async () => {
+    if (!raffleCode) return;
+    
+    try {
+      // Obtener detalles de la rifa por código
+      const raffleResponse = await fetch(`${API_URL}/raffle/by-code/${raffleCode}`);
+      if (!raffleResponse.ok) {
+        return; // Silenciosamente fallar si hay error
+      }
+      const raffleData: Raffle = await raffleResponse.json();
+      setRaffle(raffleData);
+
+      // Si selectNumber es true, obtener tickets comprados
+      if (raffleData.selectNumber) {
+        const ticketsResponse = await fetch(`${API_URL}/raffle/${raffleData.id}/purchased-tickets`);
+        if (ticketsResponse.ok) {
+          const ticketsData: PurchasedTicket[] = await ticketsResponse.json();
+          setPurchasedTickets(ticketsData);
+        }
+      }
+    } catch (err) {
+      // Silenciosamente fallar, no mostrar error en actualizaciones automáticas
+      console.error('Error al actualizar datos de la rifa:', err);
+    }
+  }, [raffleCode]);
+
+  // Cargar datos iniciales con loading
   useEffect(() => {
     const loadRaffleData = async () => {
       try {
@@ -195,6 +223,17 @@ export default function RaffleDetailPage() {
       loadRaffleData();
     }
   }, [raffleCode]);
+
+  // Actualizar datos cada 3 minutos sin mostrar loading
+  useEffect(() => {
+    if (!raffle) return; // Solo actualizar si ya hay datos cargados
+
+    const interval = setInterval(() => {
+      refreshRaffleData();
+    }, 3 * 60 * 1000); // 3 minutos
+
+    return () => clearInterval(interval);
+  }, [raffle, refreshRaffleData]);
 
   const handleAcceptTerms = () => {
     setShowTerms(false);
@@ -566,14 +605,8 @@ export default function RaffleDetailPage() {
           isOpen={showSuccessModal}
           onClose={() => {
             setShowSuccessModal(false);
-            // Resetear todo
-            setSelectedPaymentMethod(null);
-            setSelectedBank(null);
-            setUserData(null);
-            setPaymentId(null);
-            setUserId(null);
-            setSelectedTickets([]);
-            setTicketQuantity(raffle?.minTickets || 1);
+            // Recargar la página para actualizar la lista de números
+            window.location.reload();
           }}
           ticketCount={raffle ? (raffle.selectNumber ? selectedTickets.length : ticketQuantity) : 0}
           paymentId={paymentId || undefined}
