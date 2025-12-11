@@ -133,7 +133,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header con logo y nombre */}
-      <header className="bg-white/95 backdrop-blur-sm shadow-md sticky top-0 z-40 border-b border-gray-200">
+      <header className="bg-slate-900/95 backdrop-blur-sm shadow-md sticky top-0 z-40 border-b border-slate-800">
         <div className="container mx-auto px-4 py-2 flex items-center justify-start gap-3">
           {client.logoURL && (
             <button
@@ -147,7 +147,7 @@ export default function Home() {
               />
             </button>
           )}
-          <h1 className="text-base md:text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-base md:text-lg font-bold text-white">
             {client.fantasyName}
           </h1>
         </div>
