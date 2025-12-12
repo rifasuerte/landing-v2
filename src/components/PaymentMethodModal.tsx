@@ -174,44 +174,6 @@ export default function PaymentMethodModal({
                         </div>
                       </div>
                       
-                      {/* Mostrar datos del banco si hay un solo banco y está seleccionado */}
-                      {isSelected && !hasMultipleBanks && method.banks && method.banks.length === 1 && (
-                        <div className="mt-4 pt-4 border-t border-gray-200">
-                          {(() => {
-                            const bank = method.banks![0];
-                            return (
-                              <div className="space-y-1">
-                                {bank.accountNumber && (
-                                  <p className="text-sm text-gray-700">
-                                    <span className="font-medium">Número de cuenta:</span> {bank.accountNumber}
-                                  </p>
-                                )}
-                                {bank.rif && (
-                                  <p className="text-sm text-gray-700">
-                                    <span className="font-medium">RIF:</span> {bank.rif}
-                                  </p>
-                                )}
-                                {bank.phone && (
-                                  <p className="text-sm text-gray-700">
-                                    <span className="font-medium">Teléfono:</span> {bank.phone}
-                                  </p>
-                                )}
-                                {bank.bankName && (
-                                  <p className="text-sm text-gray-700">
-                                    <span className="font-medium">Banco:</span> {bank.bankName}
-                                  </p>
-                                )}
-                                {bank.accountType && (
-                                  <p className="text-sm text-gray-700">
-                                    <span className="font-medium">Tipo de cuenta:</span> {bank.accountType}
-                                  </p>
-                                )}
-                              </div>
-                            );
-                          })()}
-                        </div>
-                      )}
-
                       {/* Mostrar bancos si hay múltiples */}
                       {isSelected && hasMultipleBanks && (
                         <div className="mt-4 pt-4 border-t border-gray-200">
@@ -234,9 +196,8 @@ export default function PaymentMethodModal({
                                   }
                                 `}
                               >
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-3 mb-2">
+                                <div className="flex items-center justify-between gap-3">
+                                  <div className="flex items-center gap-3 min-w-0">
                                       {bank.logoURL && (
                                         <div className="w-10 h-10 flex-shrink-0 rounded-full overflow-hidden bg-gray-100">
                                           <ImageWithGoogleDrive
@@ -247,37 +208,9 @@ export default function PaymentMethodModal({
                                         </div>
                                       )}
                                       {bank.name && (
-                                        <p className="font-medium text-gray-900">{bank.name}</p>
+                                        <p className="font-medium text-gray-900 truncate">{bank.name}</p>
                                       )}
                                     </div>
-                                    <div className="space-y-1 ml-0">
-                                      {bank.accountNumber && (
-                                        <p className="text-sm text-gray-700">
-                                          <span className="font-medium">Número de cuenta:</span> {bank.accountNumber}
-                                        </p>
-                                      )}
-                                      {bank.rif && (
-                                        <p className="text-sm text-gray-700">
-                                          <span className="font-medium">RIF:</span> {bank.rif}
-                                        </p>
-                                      )}
-                                      {bank.phone && (
-                                        <p className="text-sm text-gray-700">
-                                          <span className="font-medium">Teléfono:</span> {bank.phone}
-                                        </p>
-                                      )}
-                                      {bank.bankName && (
-                                        <p className="text-sm text-gray-700">
-                                          <span className="font-medium">Banco:</span> {bank.bankName}
-                                        </p>
-                                      )}
-                                      {bank.accountType && (
-                                        <p className="text-sm text-gray-700">
-                                          <span className="font-medium">Tipo de cuenta:</span> {bank.accountType}
-                                        </p>
-                                      )}
-                                    </div>
-                                  </div>
                                   <div className={`
                                     w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0
                                     ${selectedBank?.id === bank.id

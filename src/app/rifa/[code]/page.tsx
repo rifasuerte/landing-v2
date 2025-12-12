@@ -422,10 +422,11 @@ export default function RaffleDetailPage() {
 
             const methodData = paymentMethodsMap.get(methodKey)!;
             
-            // Agregar el paymentData como banco, usando el name del paymentData si existe
+            // Agregar el paymentData como banco (en el selector solo se elige; los detalles se ven en "Realiza tu Pago")
             methodData.banks.push({
               id: payment.id,
-              name: payment.name || payment.bank || payment.method,
+              // Para listar opciones, prioriza el banco (si existe). Si no, el nombre del titular. Si no, el método.
+              name: payment.bank || payment.name || payment.method,
               logoURL: payment.logo || null,
               rif: payment.identification || undefined,
               phone: payment.phoneNumber || undefined,
@@ -480,27 +481,33 @@ export default function RaffleDetailPage() {
       )}
 
       {/* Modal de instrucciones de pago */}
-      {showPaymentInstructionsModal && raffle && selectedPaymentMethod && (
-        <PaymentInstructionsModal
-          isOpen={showPaymentInstructionsModal}
-          onClose={() => setShowPaymentInstructionsModal(false)}
-          onReportPayment={() => {
-            setShowPaymentInstructionsModal(false);
-            setShowUploadVoucherModal(true);
-          }}
-          paymentData={{
-            method: selectedPaymentMethod.method,
-            name: selectedBank?.name || selectedPaymentMethod.banks?.[0]?.name,
-            accountNumber: selectedBank?.accountNumber || selectedPaymentMethod.banks?.[0]?.accountNumber,
-            rif: selectedBank?.rif || selectedPaymentMethod.banks?.[0]?.rif,
-            phone: selectedBank?.phone || selectedPaymentMethod.banks?.[0]?.phone,
-            bank: selectedBank?.bankName || selectedPaymentMethod.banks?.[0]?.bankName,
-            accountType: selectedBank?.accountType || selectedPaymentMethod.banks?.[0]?.accountType,
-            amount: (parseFloat(raffle.ticketPrice) * (raffle.selectNumber ? selectedTickets.length : ticketQuantity)).toFixed(2),
-            currency: raffle.ticketCurrency,
-          }}
-        />
-      )}
+      {showPaymentInstructionsModal && raffle && selectedPaymentMethod && (() => {
+        const clean = (v?: string | null) => (v && v.trim() !== '' ? v : undefined);
+        const selectedPaymentDataId = selectedBank?.id ?? selectedPaymentMethod?.banks?.[0]?.id;
+        const paymentRecord = raffle.paymentData?.find((p) => p.id === selectedPaymentDataId);
+
+        return (
+          <PaymentInstructionsModal
+            isOpen={showPaymentInstructionsModal}
+            onClose={() => setShowPaymentInstructionsModal(false)}
+            onReportPayment={() => {
+              setShowPaymentInstructionsModal(false);
+              setShowUploadVoucherModal(true);
+            }}
+            paymentData={{
+              method: clean(paymentRecord?.method) || clean(selectedPaymentMethod.method),
+              name: clean(paymentRecord?.name),
+              accountNumber: clean(paymentRecord?.accountNumber),
+              rif: clean(paymentRecord?.identification),
+              phone: clean(paymentRecord?.phoneNumber),
+              bank: clean(paymentRecord?.bank),
+              accountType: clean(paymentRecord?.accountType),
+              amount: (parseFloat(raffle.ticketPrice) * (raffle.selectNumber ? selectedTickets.length : ticketQuantity)).toFixed(2),
+              currency: raffle.ticketCurrency,
+            }}
+          />
+        );
+      })()}
 
       {/* Modal de subir comprobante */}
       {showUploadVoucherModal && raffle && userData && (
