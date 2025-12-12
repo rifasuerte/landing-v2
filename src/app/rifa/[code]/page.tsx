@@ -879,13 +879,17 @@ export default function RaffleDetailPage() {
                     if (validQuantities.length === 5) {
                       const firstThree = validQuantities.slice(0, 3);
                       const lastTwo = validQuantities.slice(3);
+                      const minTicketsSafe = minTickets || 1;
+                      const maxTicketsSafe = raffle.ticketLimit || 999;
+                      // El más popular debe ser 10 (si está dentro del rango). Si no, se clampa al rango.
+                      const popularQty = Math.min(Math.max(10, minTicketsSafe), maxTicketsSafe);
                       
                       return (
                         <>
                           <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mb-2">
                             {firstThree.map((qty) => {
                               const isSelected = ticketQuantity === qty;
-                              const isPopular = qty === (minTickets === 1 ? 2 : minTickets);
+                              const isPopular = qty === popularQty;
                               
                               return (
                                 <button
@@ -924,7 +928,7 @@ export default function RaffleDetailPage() {
                           <div className="flex justify-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
                             {lastTwo.map((qty) => {
                               const isSelected = ticketQuantity === qty;
-                              const isPopular = qty === (minTickets === 1 ? 2 : minTickets);
+                              const isPopular = qty === popularQty;
                               
                               return (
                                 <button
@@ -968,8 +972,11 @@ export default function RaffleDetailPage() {
                       <div className={`grid ${gridCols} gap-1.5 sm:gap-2 mb-2 sm:mb-3`} style={validQuantities.length <= 2 ? { maxWidth: '200px', margin: '0 auto' } : {}}>
                         {validQuantities.map((qty, idx) => {
                           const isSelected = ticketQuantity === qty;
-                          // El más popular es el mínimo o el mínimo + 1 si el mínimo es 1
-                          const isPopular = qty === (minTickets === 1 ? 2 : minTickets);
+                          // El más popular debe ser 10 (clamp al rango)
+                          const minTicketsSafe = minTickets || 1;
+                          const maxTicketsSafe = raffle.ticketLimit || 999;
+                          const popularQty = Math.min(Math.max(10, minTicketsSafe), maxTicketsSafe);
+                          const isPopular = qty === popularQty;
                           
                           return (
                             <button
@@ -1010,21 +1017,46 @@ export default function RaffleDetailPage() {
 
                   {/* Input con botones - y + */}
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4">
-                    <button
-                      onClick={() => setTicketQuantity(Math.max(raffle.minTickets || 1, ticketQuantity - 1))}
-                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gray-800 hover:bg-gray-700 text-white flex items-center justify-center font-bold text-base sm:text-lg transition-colors"
-                    >
-                      -
-                    </button>
-                    <div className="flex-1 bg-gray-800 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 text-center">
-                      <span className="text-white text-lg sm:text-xl font-bold">{ticketQuantity}</span>
-                    </div>
-                    <button
-                      onClick={() => setTicketQuantity(Math.min(raffle.ticketLimit || 999, ticketQuantity + 1))}
-                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gray-800 hover:bg-gray-700 text-white flex items-center justify-center font-bold text-base sm:text-lg transition-colors"
-                    >
-                      +
-                    </button>
+                    {(() => {
+                      const minQ = raffle.minTickets || 1;
+                      const maxQ = raffle.ticketLimit || 999;
+                      const clamp = (n: number) => Math.min(maxQ, Math.max(minQ, n));
+                      return (
+                        <>
+                          <button
+                            onClick={() => setTicketQuantity(clamp(ticketQuantity - 1))}
+                            disabled={ticketQuantity <= minQ}
+                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white flex items-center justify-center font-bold text-base sm:text-lg transition-colors"
+                          >
+                            -
+                          </button>
+                          <div className="flex-1 bg-gray-800 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 text-center">
+                            <input
+                              type="number"
+                              inputMode="numeric"
+                              value={ticketQuantity}
+                              min={minQ}
+                              max={maxQ}
+                              onChange={(e) => {
+                                const raw = e.target.value;
+                                const parsed = Number(raw);
+                                if (Number.isNaN(parsed)) return;
+                                setTicketQuantity(clamp(parsed));
+                              }}
+                              onBlur={() => setTicketQuantity(clamp(ticketQuantity))}
+                              className="w-full bg-transparent text-white text-lg sm:text-xl font-bold text-center outline-none"
+                            />
+                          </div>
+                          <button
+                            onClick={() => setTicketQuantity(clamp(ticketQuantity + 1))}
+                            disabled={ticketQuantity >= maxQ}
+                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white flex items-center justify-center font-bold text-base sm:text-lg transition-colors"
+                          >
+                            +
+                          </button>
+                        </>
+                      );
+                    })()}
                   </div>
 
                   {/* Botón de participar */}
