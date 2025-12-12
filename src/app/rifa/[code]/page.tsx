@@ -394,6 +394,8 @@ export default function RaffleDetailPage() {
             rif?: string;
             phone?: string;
             accountNumber?: string;
+            accountType?: string;
+            bankName?: string;
           }>;
         }>();
 
@@ -420,27 +422,17 @@ export default function RaffleDetailPage() {
 
             const methodData = paymentMethodsMap.get(methodKey)!;
             
-            // Si tiene banco, agregarlo a la lista de bancos
-            if (payment.bank) {
-              methodData.banks.push({
-                id: payment.id,
-                name: payment.bank,
-                logoURL: payment.logo || null,
-                rif: payment.identification || undefined,
-                phone: payment.phoneNumber || undefined,
-                accountNumber: payment.accountNumber || undefined,
-              });
-            } else {
-              // Si no tiene banco pero tiene datos, crear un "banco" único para este método
-              methodData.banks.push({
-                id: payment.id,
-                name: payment.method,
-                logoURL: payment.logo || null,
-                rif: payment.identification || undefined,
-                phone: payment.phoneNumber || undefined,
-                accountNumber: payment.accountNumber || undefined,
-              });
-            }
+            // Agregar el paymentData como banco, usando el name del paymentData si existe
+            methodData.banks.push({
+              id: payment.id,
+              name: payment.name || payment.bank || payment.method,
+              logoURL: payment.logo || null,
+              rif: payment.identification || undefined,
+              phone: payment.phoneNumber || undefined,
+              accountNumber: payment.accountNumber || undefined,
+              accountType: payment.accountType || undefined,
+              bankName: payment.bank || undefined,
+            });
           });
         }
 
