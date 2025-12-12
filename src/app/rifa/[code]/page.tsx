@@ -489,9 +489,13 @@ export default function RaffleDetailPage() {
             setShowUploadVoucherModal(true);
           }}
           paymentData={{
+            method: selectedPaymentMethod.method,
+            name: selectedBank?.name || selectedPaymentMethod.banks?.[0]?.name,
+            accountNumber: selectedBank?.accountNumber || selectedPaymentMethod.banks?.[0]?.accountNumber,
             rif: selectedBank?.rif || selectedPaymentMethod.banks?.[0]?.rif,
-            bank: selectedBank?.name || selectedPaymentMethod.name,
             phone: selectedBank?.phone || selectedPaymentMethod.banks?.[0]?.phone,
+            bank: selectedBank?.bankName || selectedPaymentMethod.banks?.[0]?.bankName,
+            accountType: selectedBank?.accountType || selectedPaymentMethod.banks?.[0]?.accountType,
             amount: (parseFloat(raffle.ticketPrice) * (raffle.selectNumber ? selectedTickets.length : ticketQuantity)).toFixed(2),
             currency: raffle.ticketCurrency,
           }}
